@@ -329,7 +329,7 @@ export const menuData = [
     description: "Crispy crepe with spiced potato filling",
     price: "149.00",
     category: "south-indian",
-    image: "https://images.unsplash.com/photo-1694174397081-b40c88c9b516?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
+    image: "https://images.unsplash.com/photo-1668236543090-82eba5ee5976?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
     isAvailable: "true"
   },
   {

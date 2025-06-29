@@ -1,4 +1,5 @@
 export const menuData = [
+  // Updated: January 2025 - Complete menu with all dishes and proper images
   // Indian Dishes
   {
     id: 1,

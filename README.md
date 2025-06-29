@@ -1,150 +1,63 @@
-# Yashavee Cloud Kitchen 🍽️
+# Yashavee Cloud Kitchen
 
-Premium cloud kitchen in Bhopal specializing in Indian, Chinese, Italian cuisine, and desserts.
+A modern, full-stack web application for Yashavee Cloud Kitchen - a premium cloud kitchen in Bhopal specializing in Indian, Chinese, Italian cuisine, and desserts.
 
-## 🌟 Features
+## Features
 
-✅ **Complete Menu System**
-- 39+ dishes across 5 categories (Indian, Chinese, Italian, South Indian, Desserts)
-- Real-time pricing and availability
-- High-quality food images from trusted sources
-
-✅ **Modern Web Application**
-- React 18 with TypeScript
-- Responsive design for all devices
-- Smooth animations with Framer Motion
-- Shopping cart with real-time item management
-
-✅ **Production Ready**
-- Vercel deployment optimized
-- Reliable storage implementation
-- Secure client/server separation
-- RESTful API architecture
-
-## 🚀 Quick Start
-
-1. **Install Dependencies**
-   ```bash
-   npm install
-   ```
-
-2. **Start Development**
-   ```bash
-   npm run dev
-   ```
-
-3. **Deploy to Vercel**
-   ```bash
-   npm install -g vercel
-   vercel --prod
-   ```
-
-## 🔧 Environment Setup
-
-### Development
-- Runs with optimized in-memory storage
-- All 39 menu items loaded automatically
-
-### Production (Vercel)
-- Environment variable: `NODE_ENV=production`
-- Production-optimized storage implementation
-- Automatic menu data loading
-
-## API Endpoints
-
-- `GET /api/menu` - All menu items
-- `GET /api/menu/:category` - Items by category
-- `GET /api/featured` - Featured dishes
+- **Complete Menu Showcase**: 39+ authentic dishes across multiple cuisines
+- **Responsive Design**: Optimized for all devices
+- **Interactive Shopping Cart**: Real-time cart management
+- **Database Integration**: PostgreSQL with fallback mechanisms
+- **Modern UI**: Built with React, TypeScript, and Tailwind CSS
+- **Smooth Animations**: Enhanced user experience with Framer Motion
 
 ## Tech Stack
 
-- **Frontend**: React 18, TypeScript, Tailwind CSS, shadcn/ui
+- **Frontend**: React 18, TypeScript, Tailwind CSS, Framer Motion
 - **Backend**: Node.js, Express.js, TypeScript
 - **Database**: PostgreSQL with Drizzle ORM
-- **Build**: Vite with HMR
+- **Build Tool**: Vite
+- **Deployment**: Ready for Render, Vercel, or Netlify
 
 ## Menu Categories
 
-- **Indian (9 items)**: Traditional Thali, Butter Chicken, Paneer Makhani, Biryani, Dal Tadka, Palak Paneer, Chicken Tikka Masala, Rajma Chawal, Chole Bhature
-- **Chinese (8 items)**: Schezwan Noodles, Manchurian, Fried Rice, Double Egg Roll, Chicken Roll, Chicken Chilli, Chicken Lollipop, Hakka Noodles
-- **Italian (8 items)**: Margherita Pizza, Pasta Alfredo, Lasagna, Garlic Bread, Risotto, Penne Arrabbiata, Bruschetta, Gnocchi
-- **South Indian (8 items)**: Masala Dosa, Idli Sambar, Rava Upma, Mysore Pak, Uttapam, Vada Sambar, Pongal, Filter Coffee
-- **Desserts (6 items)**: Gulab Jamun, Tiramisu, Cheesecake, Ice Cream Sundae, Rasmalai, Chocolate Mousse
+- **Indian Cuisine**: Traditional Thali, Butter Chicken, Biryani, Paneer dishes
+- **Chinese**: Schezwan Noodles, Manchurian, Fried Rice, Chicken specialties  
+- **Italian**: Margherita Pizza, Pasta Alfredo, Lasagna, Garlic Bread
+- **Desserts**: Gulab Jamun, Tiramisu, Cheesecake, Traditional sweets
+- **South Indian**: Masala Dosa, Idli Sambar, Filter Coffee
 
-## Deployment Status
+## Local Development
 
-**Production Ready for Vercel:**
-- Optimized for serverless deployment
-- Production storage implementation
-- Environment-based configuration
-- All 39 menu items auto-loaded
-
-**Live Deployment:**
-- Easy Vercel deployment with single command
-- Automatic environment detection
-- Complete menu system functional
-
-## Project Structure
-
-```
-├── client/          # React frontend
-├── server/          # Express.js backend  
-├── shared/          # Shared types and schemas
-├── vercel.json     # Vercel deployment config
-└── README.md       # Project documentation
-```
-
-## Development
-
-### Prerequisites
-- Node.js 18.x or higher
-- npm package manager
-- Git for version control
-
-### Local Development
 ```bash
-# Clone repository
-git clone https://github.com/yourusername/yashavee-cloud-kitchen.git
-cd yashavee-cloud-kitchen
-
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
 ```
 
-### Building for Production
-```bash
-# Create production build
-npm run build
+## Deployment on Render
 
-# Start production server
-npm start
-```
+1. **Create GitHub Repository**
+2. **Connect to Render**:
+   - Go to render.com
+   - Create new Web Service
+   - Connect GitHub repository
+3. **Configure**:
+   - Build Command: `npm install && npm run build`
+   - Start Command: `npm start`
+4. **Add Environment Variables**:
+   - `DATABASE_URL`: Your PostgreSQL connection string
+   - `NODE_ENV`: production
 
-## API Endpoints
+## Database
 
-### Menu Management
-- `GET /api/menu` - Retrieve all menu items
-- `GET /api/menu/:category` - Get menu items by category
-- `GET /api/featured` - Fetch featured dishes
+The application uses PostgreSQL with automatic seeding of menu items. Database connection includes fallback mechanisms for reliability.
 
-### Categories Available
-- Indian (9 items)
-- Chinese (8 items) 
-- Italian (8 items)
-- South Indian (8 items)
-- Desserts (6 items)
+## Contact Information
 
-## Contributing
-
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+- **Location**: Bhopal, Madhya Pradesh
+- **Delivery**: All over Bhopal - Complete city coverage
+- **Specialization**: Indian, Chinese, Italian cuisine, and desserts
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-**Yashavee Cloud Kitchen** - Complete city coverage across Bhopal
+MIT License

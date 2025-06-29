@@ -567,7 +567,5 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-import { VercelStorage } from './vercel-storage';
-
 // Use database storage for all environments
 export const storage = new DatabaseStorage();

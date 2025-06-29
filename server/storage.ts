@@ -478,6 +478,23 @@ export class MemStorage implements IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  private isSeeded = false;
+
+  async ensureSeeded() {
+    if (this.isSeeded) return;
+    
+    try {
+      const count = await db.select().from(menuItems).then(items => items.length);
+      if (count === 0) {
+        const { seedDatabase } = await import('./seed');
+        await seedDatabase();
+      }
+      this.isSeeded = true;
+    } catch (error) {
+      console.log('Seeding check:', error);
+    }
+  }
+
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
@@ -497,14 +514,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMenuItems(): Promise<MenuItem[]> {
+    await this.ensureSeeded();
     return await db.select().from(menuItems);
   }
 
   async getMenuItemsByCategory(category: string): Promise<MenuItem[]> {
+    await this.ensureSeeded();
     return await db.select().from(menuItems).where(eq(menuItems.category, category));
   }
 
   async getFeaturedItems(): Promise<MenuItem[]> {
+    await this.ensureSeeded();
     // Return a featured item from each category
     const categories = ['indian', 'chinese', 'italian', 'desserts', 'south-indian'];
     const featured: MenuItem[] = [];

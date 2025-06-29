@@ -325,7 +325,7 @@ const sampleMenuItems: InsertMenuItem[] = [
   }
 ];
 
-async function seedDatabase() {
+export async function seedDatabase() {
   console.log("Seeding database with menu items...");
   
   try {

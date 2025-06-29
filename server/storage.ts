@@ -569,7 +569,5 @@ export class DatabaseStorage implements IStorage {
 
 import { VercelStorage } from './vercel-storage';
 
-// Use production-ready storage based on environment
-export const storage = process.env.NODE_ENV === 'production' 
-  ? new VercelStorage()
-  : new DatabaseStorage();
+// Use database storage for all environments
+export const storage = new DatabaseStorage();

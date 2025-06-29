@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus, Heart, Share2, ZoomIn, Star } from "lucide-react";
@@ -139,6 +139,9 @@ export default function DishImageModal({ dish, isOpen, onClose, onAddToCart }: D
                     <X className="h-5 w-5" />
                   </Button>
                 </div>
+                <DialogDescription className="text-gray-600">
+                  View detailed information about {dish.name} including ingredients, preparation time, and nutritional details.
+                </DialogDescription>
                 
                 {/* Rating */}
                 <div className="flex items-center space-x-2">

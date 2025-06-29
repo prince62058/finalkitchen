@@ -61,4 +61,9 @@ router.get("/featured", async (req: Request, res: Response) => {
   }
 });
 
+export function registerRoutes(app: any) {
+  app.use('/api', router);
+  return app;
+}
+
 export default router;

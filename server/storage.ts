@@ -484,14 +484,20 @@ export class DatabaseStorage implements IStorage {
     if (this.isSeeded) return;
     
     try {
+      console.log('Checking database connection...');
       const count = await db.select().from(menuItems).then(items => items.length);
+      console.log(`Found ${count} menu items in database`);
+      
       if (count === 0) {
+        console.log('Database empty, seeding...');
         const { seedDatabase } = await import('./seed');
         await seedDatabase();
+        console.log('Database seeding completed');
       }
       this.isSeeded = true;
     } catch (error) {
-      console.log('Seeding check:', error);
+      console.error('Database connection or seeding failed:', error);
+      throw error; // Propagate error instead of silently failing
     }
   }
 
@@ -514,32 +520,56 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMenuItems(): Promise<MenuItem[]> {
-    await this.ensureSeeded();
-    return await db.select().from(menuItems);
+    try {
+      await this.ensureSeeded();
+      return await db.select().from(menuItems);
+    } catch (error) {
+      console.error('Database failed, using fallback data:', error);
+      // Fallback to in-memory storage if database fails
+      const memStorage = new MemStorage();
+      return await memStorage.getMenuItems();
+    }
   }
 
   async getMenuItemsByCategory(category: string): Promise<MenuItem[]> {
-    await this.ensureSeeded();
-    return await db.select().from(menuItems).where(eq(menuItems.category, category));
+    try {
+      await this.ensureSeeded();
+      return await db.select().from(menuItems).where(eq(menuItems.category, category));
+    } catch (error) {
+      console.error('Database failed, using fallback data:', error);
+      const memStorage = new MemStorage();
+      return await memStorage.getMenuItemsByCategory(category);
+    }
   }
 
   async getFeaturedItems(): Promise<MenuItem[]> {
-    await this.ensureSeeded();
-    // Return a featured item from each category
-    const categories = ['indian', 'chinese', 'italian', 'desserts', 'south-indian'];
-    const featured: MenuItem[] = [];
-    
-    for (const category of categories) {
-      const [item] = await db.select().from(menuItems)
-        .where(eq(menuItems.category, category))
-        .limit(1);
-      if (item) {
-        featured.push(item);
+    try {
+      await this.ensureSeeded();
+      // Return a featured item from each category
+      const categories = ['indian', 'chinese', 'italian', 'desserts', 'south-indian'];
+      const featured: MenuItem[] = [];
+      
+      for (const category of categories) {
+        const [item] = await db.select().from(menuItems)
+          .where(eq(menuItems.category, category))
+          .limit(1);
+        if (item) {
+          featured.push(item);
+        }
       }
+      
+      return featured;
+    } catch (error) {
+      console.error('Database failed, using fallback data:', error);
+      const memStorage = new MemStorage();
+      return await memStorage.getFeaturedItems();
     }
-    
-    return featured;
   }
 }
 
-export const storage = new DatabaseStorage();
+import { VercelStorage } from './vercel-storage';
+
+// Use production-ready storage based on environment
+export const storage = process.env.NODE_ENV === 'production' 
+  ? new VercelStorage()
+  : new DatabaseStorage();

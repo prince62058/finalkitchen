@@ -342,12 +342,12 @@ export async function seedDatabase() {
 }
 
 // Run if called directly
-seedDatabase().then(() => {
-  console.log("Database seeding complete!");
-  process.exit(0);
-}).catch((error) => {
-  console.error("Database seeding failed:", error);
-  process.exit(1);
-});
-
-export { seedDatabase };
+if (import.meta.url === `file://${process.argv[1]}`) {
+  seedDatabase().then(() => {
+    console.log("Database seeding complete!");
+    process.exit(0);
+  }).catch((error) => {
+    console.error("Database seeding failed:", error);
+    process.exit(1);
+  });
+}

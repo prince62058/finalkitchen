@@ -43,7 +43,7 @@ git push -u origin main
 - **Region**: `Oregon (US West)` या `Frankfurt (EU)`
 - **Branch**: `main`
 - **Root Directory**: leave blank
-- **Build Command**: `npm install && npm run build`
+- **Build Command**: `npm install && npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist`
 - **Start Command**: `npm start`
 
 ## Step 5: Environment Variables Add करें
@@ -89,26 +89,37 @@ Project में ये files होनी चाहिए:
 - ✅ Environment variables properly configured
 - ✅ Database fallback mechanism (already done)
 
+## Build Error Fix - "vite: not found"
+
+**Problem**: Build fails with error `sh: 1: vite: not found`
+
+**Solution**: Updated build command में `npx` use करें:
+
+**Old (Failing)**: `npm install && npm run build`
+**New (Fixed)**: `npm install && npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist`
+
+**Why this works**:
+- `npx vite build` downloads and runs vite directly
+- `npx esbuild` bundles the server code properly
+- No dependency conflicts
+
 ## Troubleshooting
 
-**अगर build fail हो:**
-1. Build logs check करें
-2. Node.js version compatibility
-3. Dependencies missing हो सकती हैं
+**अगर build अभी भी fail हो:**
+1. Updated build command use करें (ऊपर दिया गया)
+2. render.yaml file updated होनी चाहिए
+3. GitHub repository में latest code push करें
 
 **अगर food items नहीं दिख रहे:**
-1. Environment variables check करें
-2. Database connection verify करें
-3. Fallback data automatically load होगा
+1. DATABASE_URL environment variable check करें
+2. PostgreSQL database running होनी चाहिए
+3. Application automatically seed करेगा database
 
-**Build Commands (package.json में already हैं):**
-```json
-{
-  "scripts": {
-    "build": "npm run build:server && npm run build:client",
-    "start": "node dist/server/index.js"
-  }
-}
+**Environment Variables Required:**
+```
+NODE_ENV=production
+PORT=10000
+DATABASE_URL=postgresql://user:password@host:port/database
 ```
 
 आपका Yashavee Cloud Kitchen site live हो जाएगी `yourapp.onrender.com` पर!

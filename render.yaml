@@ -3,12 +3,14 @@ services:
     name: yashavee-cloud-kitchen
     env: node
     plan: free
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
+      - key: DATABASE_URL
+        sync: false
     domains:
       - yashavee-cloud-kitchen.onrender.com

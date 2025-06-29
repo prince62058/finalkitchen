@@ -105,14 +105,15 @@ This is a full-stack web application for Yashavee Cloud Kitchen, a premium cloud
 - Easy transition from in-memory to persistent storage
 
 ## Recent Changes
-- **June 29, 2025**: Successfully completed database integration and Render deployment preparation
-  - Added PostgreSQL database with complete menu data seeding
-  - Updated storage system to use DatabaseStorage with fallback mechanisms
-  - Applied database schema changes and seeded 39 menu items across all categories
-  - Created comprehensive deployment documentation for Render
-  - Added render.yaml configuration file for streamlined deployment
-  - Updated README with complete project information and deployment instructions
-  - Prepared project for production deployment with environment variable configuration
+- **June 29, 2025**: Fixed Render deployment build failure and updated database
+  - Resolved "vite: not found" build error by updating render.yaml with npx commands
+  - Updated build command to: `npm install && npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist`
+  - Successfully seeded database with all 43 menu items from menuData.ts
+  - Database now contains authentic food images and proper pricing (₹40-₹199)
+  - Categories: Indian (9), Chinese (10), Italian (8), Desserts (8), South Indian (8)
+  - Updated RENDER_DEPLOYMENT.md with build fix instructions
+  - Added DATABASE_URL environment variable to render.yaml configuration
+  - Project ready for successful Render deployment
 - **June 29, 2025**: Successfully completed migration and Vercel deployment optimization
   - Migrated project from Replit Agent to standard Replit environment with full database integration
   - Implemented PostgreSQL database with proper client/server separation and security practices

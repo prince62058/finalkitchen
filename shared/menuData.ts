@@ -1,4 +1,3 @@
-
 export const menuData = [
   // Indian Dishes
   {
@@ -330,7 +329,7 @@ export const menuData = [
     description: "Crispy crepe with spiced potato filling",
     price: "149.00",
     category: "south-indian",
-    image: "https://images.unsplash.com/photo-1630383249896-424e482df921?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
+    image: "https://images.unsplash.com/photo-1694174397081-b40c88c9b516?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
     isAvailable: "true"
   },
   {

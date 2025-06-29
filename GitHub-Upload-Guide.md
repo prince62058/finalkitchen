@@ -33,8 +33,13 @@ git commit -m "Complete Yashavee Cloud Kitchen with Vercel deployment ready"
 git remote add origin https://github.com/YOUR_USERNAME/yashavee-cloud-kitchen.git
 
 # Push to GitHub
-git push -u origin main
+git push origin main
 ```
+
+## ✅ Status Update - Commands Successfully Executed:
+- `git add .` ✓ Completed
+- `git commit -m "Complete restaurant website..."` ✓ Completed
+- Ready for final push to: https://github.com/prince62058/finalkitchen.git
 
 ### Option 2: GitHub Desktop
 1. Open GitHub Desktop

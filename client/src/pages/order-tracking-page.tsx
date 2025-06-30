@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import OrderTracking from "@/components/order-tracking";
-import { Search, Package } from "lucide-react";
+import { Search, Package, ArrowLeft, Home } from "lucide-react";
 
 export default function OrderTrackingPage() {
   const [orderId, setOrderId] = useState("");
@@ -23,6 +24,16 @@ export default function OrderTrackingPage() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 py-8">
       <div className="container mx-auto px-4">
         <div className="max-w-2xl mx-auto">
+          {/* Back to Home Button */}
+          <div className="mb-6">
+            <Link href="/">
+              <Button variant="ghost" className="text-gray-600 hover:text-orange-600">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
+          
           <div className="text-center mb-8">
             <Package className="w-16 h-16 text-orange-600 mx-auto mb-4" />
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Track Your Order</h1>

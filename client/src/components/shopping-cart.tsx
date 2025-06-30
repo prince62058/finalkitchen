@@ -140,9 +140,10 @@ export default function ShoppingCartComponent({ className = "" }: ShoppingCartPr
             </SheetTitle>
           </SheetHeader>
 
-          <div className="mt-6 space-y-4">
-            <AnimatePresence>
-              {cartItems.length === 0 ? (
+          <div className="mt-6 flex-1 overflow-y-auto max-h-[calc(100vh-300px)]">
+            <div className="space-y-4 pr-2">
+              <AnimatePresence>
+                {cartItems.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -221,7 +222,8 @@ export default function ShoppingCartComponent({ className = "" }: ShoppingCartPr
                   </motion.div>
                 ))
               )}
-            </AnimatePresence>
+              </AnimatePresence>
+            </div>
           </div>
 
           {cartItems.length > 0 && (

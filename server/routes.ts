@@ -1,5 +1,6 @@
 
 import express, { type Request, type Response } from "express";
+import { createServer } from "http";
 import { menuData } from "@shared/menuData";
 
 const router = express.Router();
@@ -63,7 +64,7 @@ router.get("/featured", async (req: Request, res: Response) => {
 
 export function registerRoutes(app: any) {
   app.use('/api', router);
-  return app;
+  return createServer(app);
 }
 
 export default router;

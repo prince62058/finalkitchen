@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Utensils, Menu } from "lucide-react";
+import { Utensils, Menu, Package } from "lucide-react";
 import ShoppingCartComponent from "./shopping-cart";
 
 export default function Navigation() {
@@ -69,6 +70,18 @@ export default function Navigation() {
                 {item.label}
               </motion.button>
             ))}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+            >
+              <Link href="/track-order">
+                <Button variant="outline" size="sm" className="border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white">
+                  <Package className="w-4 h-4 mr-2" />
+                  Track Order
+                </Button>
+              </Link>
+            </motion.div>
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}

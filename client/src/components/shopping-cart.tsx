@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ShoppingCart, Plus, Minus, Trash2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import OrderCheckout from "./order-checkout";
+import OrderTracking from "./order-tracking";
 import type { MenuItem } from "@shared/schema";
 
 interface CartItem extends MenuItem {
@@ -19,6 +21,9 @@ export default function ShoppingCartComponent({ className = "" }: ShoppingCartPr
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [itemAddedAnimation, setItemAddedAnimation] = useState<number | null>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [showTracking, setShowTracking] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState<number>(0);
 
   // Add item to cart function that can be called from other components
   const addToCart = (item: MenuItem) => {
@@ -233,6 +238,10 @@ export default function ShoppingCartComponent({ className = "" }: ShoppingCartPr
               <Button 
                 className="w-full button-3d success-gradient text-white py-3 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                 size="lg"
+                onClick={() => {
+                  setIsOpen(false);
+                  setShowCheckout(true);
+                }}
               >
                 Proceed to Checkout
               </Button>
@@ -269,6 +278,27 @@ export default function ShoppingCartComponent({ className = "" }: ShoppingCartPr
           </Button>
         </motion.div>
       )}
+
+      {/* Order Checkout Modal */}
+      <OrderCheckout
+        isOpen={showCheckout}
+        onClose={() => setShowCheckout(false)}
+        cartItems={cartItems}
+        totalAmount={totalPrice}
+        onOrderPlaced={(orderId) => {
+          setCurrentOrderId(orderId);
+          setCartItems([]); // Clear cart after order
+          setShowCheckout(false);
+          setShowTracking(true);
+        }}
+      />
+
+      {/* Order Tracking Modal */}
+      <OrderTracking
+        isOpen={showTracking}
+        onClose={() => setShowTracking(false)}
+        orderId={currentOrderId}
+      />
     </>
   );
 }

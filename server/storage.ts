@@ -1,4 +1,4 @@
-import { users, menuItems, type User, type InsertUser, type MenuItem, type InsertMenuItem } from "@shared/schema";
+import { users, menuItems, orders, type User, type InsertUser, type MenuItem, type InsertMenuItem, type Order, type InsertOrder, type OrderStatus } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -9,6 +9,12 @@ export interface IStorage {
   getMenuItems(): Promise<MenuItem[]>;
   getMenuItemsByCategory(category: string): Promise<MenuItem[]>;
   getFeaturedItems(): Promise<MenuItem[]>;
+  // Order management
+  createOrder(order: InsertOrder): Promise<Order>;
+  getOrder(id: number): Promise<Order | undefined>;
+  updateOrderStatus(id: number, status: OrderStatus): Promise<Order | undefined>;
+  getOrdersByPhone(phone: string): Promise<Order[]>;
+  getAllOrders(): Promise<Order[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -475,6 +481,44 @@ export class MemStorage implements IStorage {
     
     return featured;
   }
+
+  // Order management methods (for memory storage - simplified implementation)
+  async createOrder(order: InsertOrder): Promise<Order> {
+    const id = Date.now(); // Simple ID generation for memory storage
+    const newOrder: Order = {
+      customerName: order.customerName,
+      customerPhone: order.customerPhone,
+      customerAddress: order.customerAddress,
+      items: order.items,
+      totalAmount: order.totalAmount,
+      estimatedTime: order.estimatedTime,
+      status: order.status || 'placed',
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    return newOrder;
+  }
+
+  async getOrder(id: number): Promise<Order | undefined> {
+    // In memory storage doesn't persist orders, return undefined
+    return undefined;
+  }
+
+  async updateOrderStatus(id: number, status: OrderStatus): Promise<Order | undefined> {
+    // In memory storage doesn't persist orders, return undefined
+    return undefined;
+  }
+
+  async getOrdersByPhone(phone: string): Promise<Order[]> {
+    // In memory storage doesn't persist orders, return empty array
+    return [];
+  }
+
+  async getAllOrders(): Promise<Order[]> {
+    // In memory storage doesn't persist orders, return empty array
+    return [];
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -563,6 +607,62 @@ export class DatabaseStorage implements IStorage {
       console.error('Database failed, using fallback data:', error);
       const memStorage = new MemStorage();
       return await memStorage.getFeaturedItems();
+    }
+  }
+
+  // Order management methods
+  async createOrder(order: InsertOrder): Promise<Order> {
+    try {
+      const [newOrder] = await db
+        .insert(orders)
+        .values(order)
+        .returning();
+      return newOrder;
+    } catch (error) {
+      console.error('Error creating order:', error);
+      throw error;
+    }
+  }
+
+  async getOrder(id: number): Promise<Order | undefined> {
+    try {
+      const [order] = await db.select().from(orders).where(eq(orders.id, id));
+      return order || undefined;
+    } catch (error) {
+      console.error('Error fetching order:', error);
+      return undefined;
+    }
+  }
+
+  async updateOrderStatus(id: number, status: OrderStatus): Promise<Order | undefined> {
+    try {
+      const [updatedOrder] = await db
+        .update(orders)
+        .set({ status, updatedAt: new Date() })
+        .where(eq(orders.id, id))
+        .returning();
+      return updatedOrder || undefined;
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      return undefined;
+    }
+  }
+
+  async getOrdersByPhone(phone: string): Promise<Order[]> {
+    try {
+      return await db.select().from(orders).where(eq(orders.customerPhone, phone));
+    } catch (error) {
+      console.error('Error fetching orders by phone:', error);
+      return [];
+    }
+  }
+
+  async getAllOrders(): Promise<Order[]> {
+    try {
+      return await db.select().from(orders);
+    } catch (error) {
+      console.error('Error fetching all orders:', error);
+      return [];
     }
   }
 }

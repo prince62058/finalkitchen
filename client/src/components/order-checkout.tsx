@@ -1,13 +1,10 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { type OrderItem } from "@shared/schema";
 
 interface CartItem {
   id: number;
@@ -35,45 +32,6 @@ export default function OrderCheckout({
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const createOrderMutation = useMutation({
-    mutationFn: async (orderData: any) => {
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        body: JSON.stringify(orderData),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to create order');
-      }
-      
-      return response.json();
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Order Placed Successfully!",
-        description: `Your order #${data.id} has been placed. Estimated delivery: ${data.estimatedTime} minutes.`,
-      });
-      onOrderPlaced(data.id);
-      onClose();
-      // Clear form
-      setCustomerName("");
-      setCustomerPhone("");
-      setCustomerAddress("");
-    },
-    onError: (error) => {
-      toast({
-        title: "Order Failed",
-        description: "There was an error placing your order. Please try again.",
-        variant: "destructive",
-      });
-      console.error("Order creation failed:", error);
-    },
-  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,28 +54,22 @@ export default function OrderCheckout({
       return;
     }
 
-    // Convert cart items to order items format
-    const orderItems: OrderItem[] = cartItems.map(item => ({
-      id: item.id,
-      name: item.name,
-      quantity: item.quantity,
-      price: item.price,
-    }));
-
-    // Calculate estimated time based on number of items (15-45 minutes)
-    const estimatedTime = Math.max(15, Math.min(45, cartItems.length * 5 + 15));
-
-    const orderData = {
-      customerName,
-      customerPhone,
-      customerAddress,
-      items: orderItems,
-      totalAmount: totalAmount.toString(),
-      estimatedTime,
-      status: "placed",
+    // Prepare checkout data for payment page
+    const checkoutData = {
+      cartItems,
+      totalAmount,
+      customerDetails: {
+        name: customerName,
+        phone: customerPhone,
+        address: customerAddress
+      }
     };
 
-    createOrderMutation.mutate(orderData);
+    // Save to localStorage for checkout page
+    localStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+    
+    // Navigate to checkout page
+    window.location.href = '/checkout';
   };
 
   return (
@@ -149,29 +101,27 @@ export default function OrderCheckout({
 
           {/* Customer Details Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="customerName">Full Name *</Label>
-                <Input
-                  id="customerName"
-                  type="text"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="Enter your full name"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="customerPhone">Phone Number *</Label>
-                <Input
-                  id="customerPhone"
-                  type="tel"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  placeholder="Enter your phone number"
-                  required
-                />
-              </div>
+            <div>
+              <Label htmlFor="customerName">Full Name *</Label>
+              <Input
+                id="customerName"
+                type="text"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="customerPhone">Phone Number *</Label>
+              <Input
+                id="customerPhone"
+                type="tel"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                placeholder="Enter your phone number"
+                required
+              />
             </div>
             <div>
               <Label htmlFor="customerAddress">Delivery Address *</Label>
@@ -196,10 +146,9 @@ export default function OrderCheckout({
               </Button>
               <Button
                 type="submit"
-                disabled={createOrderMutation.isPending}
-                className="flex-1 bg-orange-600 hover:bg-orange-700"
+                className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                {createOrderMutation.isPending ? "Placing Order..." : "Place Order"}
+                Proceed to Payment
               </Button>
             </div>
           </form>

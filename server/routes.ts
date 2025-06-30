@@ -5,6 +5,14 @@ import { WebSocketServer, WebSocket } from "ws";
 import { menuData } from "@shared/menuData";
 import { storage } from "./storage";
 import { insertOrderSchema, type OrderStatus } from "@shared/schema";
+import Stripe from "stripe";
+
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2025-05-28.basil",
+});
 
 const router = express.Router();
 
@@ -142,6 +150,36 @@ router.get("/admin/orders", async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error fetching all orders:', error);
     res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
+// Stripe payment route for one-time payments
+router.post("/create-payment-intent", async (req: Request, res: Response) => {
+  try {
+    const { amount, customerName, items } = req.body;
+    
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: "Valid amount is required" });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(parseFloat(amount) * 100), // Convert to paisa (cents)
+      currency: "inr", // Indian Rupees
+      metadata: {
+        customerName: customerName || "Guest",
+        items: JSON.stringify(items || [])
+      }
+    });
+
+    res.json({ 
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id
+    });
+  } catch (error: any) {
+    console.error("Error creating payment intent:", error);
+    res.status(500).json({ 
+      message: "Error creating payment intent: " + error.message 
+    });
   }
 });
 

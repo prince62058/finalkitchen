@@ -25,6 +25,25 @@ export default function ShoppingCartComponent({ className = "" }: ShoppingCartPr
   const [showTracking, setShowTracking] = useState(false);
   const [currentOrderId, setCurrentOrderId] = useState<number>(0);
 
+  // Load cart from localStorage on component mount
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      try {
+        const parsedCart = JSON.parse(savedCart);
+        setCartItems(parsedCart);
+      } catch (error) {
+        console.error('Error loading cart from localStorage:', error);
+        localStorage.removeItem('cart');
+      }
+    }
+  }, []);
+
+  // Save cart to localStorage whenever cartItems changes
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+  }, [cartItems]);
+
   // Add item to cart function that can be called from other components
   const addToCart = (item: MenuItem) => {
     console.log('Adding to cart:', item.name);
@@ -71,6 +90,7 @@ export default function ShoppingCartComponent({ className = "" }: ShoppingCartPr
   // Clear cart
   const clearCart = () => {
     setCartItems([]);
+    localStorage.removeItem('cart');
   };
 
   // Calculate totals

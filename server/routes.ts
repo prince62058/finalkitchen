@@ -146,6 +146,46 @@ router.get("/orders/phone/:phone", async (req: Request, res: Response) => {
   }
 });
 
+// Cancel order
+router.patch("/orders/:id/cancel", async (req: Request, res: Response) => {
+  try {
+    const orderId = parseInt(req.params.id);
+    
+    // Get current order
+    const currentOrder = await storage.getOrder(orderId);
+    if (!currentOrder) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    
+    // Check if order can be cancelled
+    const cancellableStatuses = ['placed', 'confirmed', 'preparing'];
+    if (!cancellableStatuses.includes(currentOrder.status)) {
+      return res.status(400).json({ 
+        error: 'Order cannot be cancelled at this stage',
+        currentStatus: currentOrder.status 
+      });
+    }
+    
+    // Update order status to cancelled
+    const updatedOrder = await storage.updateOrderStatus(orderId, 'cancelled' as any);
+    
+    if (updatedOrder) {
+      // Broadcast the order update
+      broadcastOrderUpdate(updatedOrder);
+      console.log(`Order ${orderId} cancelled successfully`);
+      res.json({ 
+        message: 'Order cancelled successfully', 
+        order: updatedOrder 
+      });
+    } else {
+      res.status(500).json({ error: 'Failed to cancel order' });
+    }
+  } catch (error) {
+    console.error('Error cancelling order:', error);
+    res.status(500).json({ error: 'Failed to cancel order' });
+  }
+});
+
 // Get all orders (for admin)
 router.get("/admin/orders", async (req: Request, res: Response) => {
   try {

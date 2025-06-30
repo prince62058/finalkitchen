@@ -82,6 +82,7 @@ export default function OrderTracking({ isOpen, onClose, orderId }: OrderTrackin
       'ready': 'bg-green-100 text-green-800 border-green-300',
       'out_for_delivery': 'bg-blue-100 text-blue-800 border-blue-300',
       'delivered': 'bg-green-100 text-green-800 border-green-300',
+      'cancelled': 'bg-red-100 text-red-800 border-red-300',
     };
     return statusColors[status] || 'bg-gray-100 text-gray-800';
   };

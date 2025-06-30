@@ -54,7 +54,7 @@ export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof orders.$inferSelect;
 
 // Order status types for better type safety
-export type OrderStatus = 'placed' | 'confirmed' | 'preparing' | 'cooking' | 'ready' | 'out_for_delivery' | 'delivered';
+export type OrderStatus = 'placed' | 'confirmed' | 'preparing' | 'cooking' | 'ready' | 'out_for_delivery' | 'delivered' | 'cancelled';
 
 export interface OrderItem {
   id: number;

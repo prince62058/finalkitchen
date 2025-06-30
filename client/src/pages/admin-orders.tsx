@@ -16,6 +16,7 @@ const statusOptions: { value: OrderStatus; label: string; color: string }[] = [
   { value: 'ready', label: 'Ready', color: 'bg-purple-100 text-purple-800' },
   { value: 'out_for_delivery', label: 'Out for Delivery', color: 'bg-indigo-100 text-indigo-800' },
   { value: 'delivered', label: 'Delivered', color: 'bg-green-100 text-green-800' },
+  { value: 'cancelled', label: 'Cancelled', color: 'bg-red-100 text-red-800' },
 ];
 
 export default function AdminOrders() {

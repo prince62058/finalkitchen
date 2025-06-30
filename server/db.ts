@@ -8,12 +8,8 @@ if (typeof window === 'undefined') {
   neonConfig.webSocketConstructor = ws;
 }
 
-// Only require DATABASE_URL in production or when explicitly using database storage
-if (!process.env.DATABASE_URL && process.env.NODE_ENV === 'production') {
-  throw new Error(
-    "DATABASE_URL must be set for production. Did you forget to provision a database?",
-  );
-}
+// Only require DATABASE_URL when it's actually needed (not for fallback storage)
+// Allow production to run without DATABASE_URL using in-memory storage
 
 // Only create database connection if DATABASE_URL is available
 export let pool: Pool | null = null;

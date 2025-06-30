@@ -673,5 +673,5 @@ export class DatabaseStorage implements IStorage {
 }
 
 // Use in-memory storage for development when DATABASE_URL is not available
-// This allows the project to run without a database for development/migration
+// For production deployments without database, also use MemStorage as fallback
 export const storage = process.env.DATABASE_URL ? new DatabaseStorage() : new MemStorage();

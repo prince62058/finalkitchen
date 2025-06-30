@@ -279,8 +279,8 @@ export default function Checkout() {
     localStorage.removeItem('cart');
     localStorage.removeItem('checkoutData');
     
-    // Redirect to order tracking
-    setLocation(`/track-order?orderId=${orderId}`);
+    // Redirect to live tracking page with order ID
+    setLocation(`/live-tracking?orderId=${orderId}`);
   };
 
   // For development mode (no Stripe), we don't need to wait for clientSecret

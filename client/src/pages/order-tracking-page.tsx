@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,12 +11,13 @@ export default function OrderTrackingPage() {
   const [orderId, setOrderId] = useState("");
   const [showTracking, setShowTracking] = useState(false);
   const [trackingOrderId, setTrackingOrderId] = useState(0);
+  const [, setLocation] = useLocation();
 
   const handleTrackOrder = () => {
     const id = parseInt(orderId);
     if (id && id > 0) {
-      setTrackingOrderId(id);
-      setShowTracking(true);
+      // Redirect to live tracking page
+      setLocation(`/live-tracking?orderId=${id}`);
     }
   };
 

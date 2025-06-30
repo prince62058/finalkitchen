@@ -20,12 +20,14 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private menuItems: Map<number, MenuItem>;
+  private orders: Map<number, Order>;
   private currentUserId: number;
   private currentMenuId: number;
 
   constructor() {
     this.users = new Map();
     this.menuItems = new Map();
+    this.orders = new Map();
     this.currentUserId = 1;
     this.currentMenuId = 1;
     
@@ -482,7 +484,7 @@ export class MemStorage implements IStorage {
     return featured;
   }
 
-  // Order management methods (for memory storage - simplified implementation)
+  // Order management methods (for memory storage with proper persistence)
   async createOrder(order: InsertOrder): Promise<Order> {
     const id = Date.now(); // Simple ID generation for memory storage
     const newOrder: Order = {
@@ -497,27 +499,39 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
+    
+    // Store the order in memory
+    this.orders.set(id, newOrder);
+    console.log(`Order ${id} created and stored in memory`);
     return newOrder;
   }
 
   async getOrder(id: number): Promise<Order | undefined> {
-    // In memory storage doesn't persist orders, return undefined
-    return undefined;
+    const order = this.orders.get(id);
+    console.log(`Fetching order ${id}:`, order ? 'found' : 'not found');
+    return order;
   }
 
   async updateOrderStatus(id: number, status: OrderStatus): Promise<Order | undefined> {
-    // In memory storage doesn't persist orders, return undefined
+    const order = this.orders.get(id);
+    if (order) {
+      order.status = status;
+      order.updatedAt = new Date();
+      this.orders.set(id, order);
+      console.log(`Order ${id} status updated to ${status}`);
+      return order;
+    }
     return undefined;
   }
 
   async getOrdersByPhone(phone: string): Promise<Order[]> {
-    // In memory storage doesn't persist orders, return empty array
-    return [];
+    return Array.from(this.orders.values()).filter(
+      order => order.customerPhone === phone
+    );
   }
 
   async getAllOrders(): Promise<Order[]> {
-    // In memory storage doesn't persist orders, return empty array
-    return [];
+    return Array.from(this.orders.values());
   }
 }
 

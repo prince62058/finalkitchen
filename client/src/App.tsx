@@ -7,6 +7,7 @@ import Home from "@/pages/home";
 import OrderTrackingPage from "@/pages/order-tracking-page";
 import AdminOrders from "@/pages/admin-orders";
 import Checkout from "@/pages/checkout";
+import LiveTracking from "@/pages/live-tracking";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -15,6 +16,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/track-order" component={OrderTrackingPage} />
+      <Route path="/live-tracking" component={LiveTracking} />
       <Route path="/admin/orders" component={AdminOrders} />
       <Route component={NotFound} />
     </Switch>

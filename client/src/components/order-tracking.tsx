@@ -14,77 +14,85 @@ interface OrderTrackingProps {
   orderId: number;
 }
 
-const orderSteps = [
-  { status: 'placed', label: 'Order Placed', icon: CheckCircle, color: 'bg-green-500' },
-  { status: 'confirmed', label: 'Confirmed', icon: CheckCircle, color: 'bg-blue-500' },
-  { status: 'preparing', label: 'Preparing', icon: Package, color: 'bg-yellow-500' },
-  { status: 'cooking', label: 'Cooking', icon: ChefHat, color: 'bg-orange-500' },
-  { status: 'ready', label: 'Ready', icon: CheckCircle, color: 'bg-purple-500' },
-  { status: 'out_for_delivery', label: 'Out for Delivery', icon: Truck, color: 'bg-indigo-500' },
-  { status: 'delivered', label: 'Delivered', icon: MapPin, color: 'bg-green-600' },
-];
-
 export default function OrderTracking({ isOpen, onClose, orderId }: OrderTrackingProps) {
-  const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [orderData, setOrderData] = useState<Order | null>(null);
+  const [ws, setWs] = useState<WebSocket | null>(null);
 
-  // Fetch initial order data
-  const { data: initialOrder, isLoading } = useQuery<Order>({
-    queryKey: ['/api/orders', orderId],
-    enabled: isOpen && orderId > 0,
+  const { data: currentOrder, isLoading, refetch } = useQuery({
+    queryKey: ['order', orderId],
+    queryFn: async () => {
+      const response = await fetch(`/api/orders/${orderId}`);
+      if (!response.ok) {
+        throw new Error('Order not found');
+      }
+      return response.json() as Promise<Order>;
+    },
+    enabled: isOpen && !!orderId,
+    refetchInterval: 5000,
   });
 
-  // Set up WebSocket connection for real-time updates
   useEffect(() => {
-    if (!isOpen || orderId <= 0) return;
+    if (!isOpen) return;
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
-    const ws = new WebSocket(wsUrl);
+    const websocket = new WebSocket(wsUrl);
 
-    ws.onopen = () => {
+    websocket.onopen = () => {
       console.log('WebSocket connected for order tracking');
     };
 
-    ws.onmessage = (event) => {
+    websocket.onmessage = (event) => {
       try {
-        const message = JSON.parse(event.data);
-        if (message.type === 'orderUpdate' && message.data.id === orderId) {
-          setOrderData(message.data);
+        const data = JSON.parse(event.data);
+        if (data.type === 'orderUpdate' && data.data.id === orderId) {
+          refetch();
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);
       }
     };
 
-    ws.onclose = () => {
+    websocket.onclose = () => {
       console.log('WebSocket disconnected');
     };
 
-    setSocket(ws);
+    setWs(websocket);
 
     return () => {
-      ws.close();
+      websocket.close();
     };
-  }, [isOpen, orderId]);
+  }, [isOpen, orderId, refetch]);
 
-  // Set initial order data
-  useEffect(() => {
-    if (initialOrder) {
-      setOrderData(initialOrder);
-    }
-  }, [initialOrder]);
+  const orderSteps = [
+    { status: 'placed', label: 'Order Placed', icon: Package, color: 'bg-blue-500' },
+    { status: 'confirmed', label: 'Order Confirmed', icon: CheckCircle, color: 'bg-green-500' },
+    { status: 'preparing', label: 'Preparing', icon: ChefHat, color: 'bg-yellow-500' },
+    { status: 'cooking', label: 'Cooking', icon: ChefHat, color: 'bg-orange-500' },
+    { status: 'ready', label: 'Ready for Pickup', icon: CheckCircle, color: 'bg-green-500' },
+    { status: 'out_for_delivery', label: 'Out for Delivery', icon: Truck, color: 'bg-blue-500' },
+    { status: 'delivered', label: 'Delivered', icon: CheckCircle, color: 'bg-green-600' },
+  ];
 
-  if (!isOpen) return null;
+  const getStatusBadgeColor = (status: OrderStatus) => {
+    const statusColors = {
+      'placed': 'bg-blue-100 text-blue-800 border-blue-300',
+      'confirmed': 'bg-green-100 text-green-800 border-green-300',
+      'preparing': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      'cooking': 'bg-orange-100 text-orange-800 border-orange-300',
+      'ready': 'bg-green-100 text-green-800 border-green-300',
+      'out_for_delivery': 'bg-blue-100 text-blue-800 border-blue-300',
+      'delivered': 'bg-green-100 text-green-800 border-green-300',
+    };
+    return statusColors[status] || 'bg-gray-100 text-gray-800';
+  };
 
-  const currentOrder = orderData || initialOrder;
-  
   if (isLoading) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-2xl">
-          <div className="flex items-center justify-center p-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mr-3" />
+            <span>Loading order details...</span>
           </div>
         </DialogContent>
       </Dialog>
@@ -95,7 +103,7 @@ export default function OrderTracking({ isOpen, onClose, orderId }: OrderTrackin
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-2xl">
-          <div className="text-center p-8">
+          <div className="text-center py-8">
             <h3 className="text-lg font-semibold mb-2">Order Not Found</h3>
             <p className="text-gray-600 mb-4">We couldn't find the order you're looking for.</p>
             <Button onClick={onClose}>Close</Button>
@@ -108,22 +116,9 @@ export default function OrderTracking({ isOpen, onClose, orderId }: OrderTrackin
   const currentStepIndex = orderSteps.findIndex(step => step.status === currentOrder.status);
   const progressPercentage = ((currentStepIndex + 1) / orderSteps.length) * 100;
 
-  const getStatusBadgeColor = (status: OrderStatus) => {
-    switch (status) {
-      case 'placed': return 'bg-green-100 text-green-800';
-      case 'confirmed': return 'bg-blue-100 text-blue-800';
-      case 'preparing': return 'bg-yellow-100 text-yellow-800';
-      case 'cooking': return 'bg-orange-100 text-orange-800';
-      case 'ready': return 'bg-purple-100 text-purple-800';
-      case 'out_for_delivery': return 'bg-indigo-100 text-indigo-800';
-      case 'delivered': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-orange-600">
             Order Tracking #{currentOrder.id}
@@ -155,7 +150,21 @@ export default function OrderTracking({ isOpen, onClose, orderId }: OrderTrackin
 
           {/* Order Timeline */}
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Order Timeline</h4>
+            <div className="flex items-center justify-between">
+              <h4 className="text-lg font-semibold">Order Timeline</h4>
+              {(currentOrder.status === 'out_for_delivery' || currentOrder.status === 'ready') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(`/live-tracking?orderId=${currentOrder.id}`, '_blank')}
+                  className="text-green-600 border-green-600 hover:bg-green-50"
+                >
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Live Tracking
+                </Button>
+              )}
+            </div>
+            
             <div className="relative">
               {orderSteps.map((step, index) => {
                 const isCompleted = index <= currentStepIndex;
@@ -168,18 +177,11 @@ export default function OrderTracking({ isOpen, onClose, orderId }: OrderTrackin
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="flex items-center mb-6 relative"
+                    className="relative flex items-center pb-8 last:pb-0"
                   >
-                    {/* Connection Line */}
+                    {/* Timeline Line */}
                     {index < orderSteps.length - 1 && (
-                      <div className="absolute left-4 top-8 w-0.5 h-8 bg-gray-200">
-                        <motion.div
-                          className="bg-orange-500 w-full origin-top"
-                          initial={{ scaleY: 0 }}
-                          animate={{ scaleY: isCompleted ? 1 : 0 }}
-                          transition={{ duration: 0.5, delay: index * 0.2 }}
-                        />
-                      </div>
+                      <div className="absolute left-4 top-8 w-px h-full bg-gray-200" />
                     )}
 
                     {/* Step Icon */}

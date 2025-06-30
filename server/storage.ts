@@ -527,9 +527,14 @@ export class DatabaseStorage implements IStorage {
   async ensureSeeded() {
     if (this.isSeeded) return;
     
+    // Check if database connection is available
+    if (!db) {
+      throw new Error('Database connection not available');
+    }
+    
     try {
       console.log('Checking database connection...');
-      const count = await db.select().from(menuItems).then(items => items.length);
+      const count = await db.select().from(menuItems).then((items: any[]) => items.length);
       console.log(`Found ${count} menu items in database`);
       
       if (count === 0) {
@@ -667,5 +672,6 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Use database storage for all environments
-export const storage = new DatabaseStorage();
+// Use in-memory storage for development when DATABASE_URL is not available
+// This allows the project to run without a database for development/migration
+export const storage = process.env.DATABASE_URL ? new DatabaseStorage() : new MemStorage();

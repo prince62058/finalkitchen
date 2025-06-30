@@ -7,12 +7,16 @@ import { storage } from "./storage";
 import { insertOrderSchema, type OrderStatus } from "@shared/schema";
 import Stripe from "stripe";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+// Stripe is optional for development
+let stripe: Stripe | null = null;
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2025-05-28.basil",
+  });
+  console.log('Stripe configured for payments');
+} else {
+  console.log('Stripe not configured - payment features will be disabled for development');
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-05-28.basil",
-});
 
 const router = express.Router();
 
@@ -160,6 +164,16 @@ router.post("/create-payment-intent", async (req: Request, res: Response) => {
     
     if (!amount || amount <= 0) {
       return res.status(400).json({ message: "Valid amount is required" });
+    }
+
+    // If Stripe is not configured, return a mock response for development
+    if (!stripe) {
+      console.log('Stripe not configured, returning mock payment intent');
+      res.json({ 
+        clientSecret: "mock_client_secret_for_development",
+        paymentIntentId: "mock_payment_intent_id"
+      });
+      return;
     }
 
     const paymentIntent = await stripe.paymentIntents.create({

@@ -12,10 +12,10 @@ import { motion } from "framer-motion";
 
 // Make sure to call `loadStripe` outside of a component's render to avoid
 // recreating the `Stripe` object on every render.
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
-}
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+// Stripe is optional for development mode
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
+  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
+  : null;
 
 interface CartItem {
   id: number;
@@ -33,6 +33,101 @@ interface CheckoutData {
     address: string;
   };
 }
+
+// Development-only checkout form for when Stripe is not configured
+const DevCheckoutForm = ({ 
+  checkoutData, 
+  onPaymentSuccess 
+}: { 
+  checkoutData: CheckoutData;
+  onPaymentSuccess: (orderId: number) => void;
+}) => {
+  const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessing(true);
+
+    try {
+      // Simulate payment processing delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Create the order directly (mock payment success)
+      const orderData = {
+        customerName: checkoutData.customerDetails.name,
+        customerPhone: checkoutData.customerDetails.phone,
+        customerAddress: checkoutData.customerDetails.address,
+        items: checkoutData.cartItems,
+        totalAmount: checkoutData.totalAmount.toString(),
+        estimatedTime: 30,
+        status: "placed" as const
+      };
+
+      const response = await apiRequest("POST", "/api/orders", orderData);
+      const order = await response.json();
+
+      toast({
+        title: "Order Placed Successfully!",
+        description: "Your order has been placed (development mode).",
+      });
+
+      onPaymentSuccess(order.id);
+    } catch (error: any) {
+      toast({
+        title: "Order Error",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <motion.form 
+      onSubmit={handleSubmit}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6"
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center text-xl">
+            <CreditCard className="w-6 h-6 mr-2 text-primary" />
+            Development Mode - Order Placement
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-blue-800 text-sm">
+              Development Mode: Payment processing is simulated. 
+              Your order will be placed without actual payment.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Button 
+        type="submit" 
+        disabled={isProcessing}
+        className="w-full py-3 text-lg font-semibold bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+      >
+        {isProcessing ? (
+          <>
+            <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2" />
+            Processing Order...
+          </>
+        ) : (
+          <>
+            <CheckCircle className="w-5 h-5 mr-2" />
+            Place Order - ₹{checkoutData.totalAmount.toFixed(2)}
+          </>
+        )}
+      </Button>
+    </motion.form>
+  );
+};
 
 const CheckoutForm = ({ 
   checkoutData, 
@@ -188,12 +283,17 @@ export default function Checkout() {
     setLocation(`/track-order?orderId=${orderId}`);
   };
 
-  if (!clientSecret || !checkoutData) {
+  // For development mode (no Stripe), we don't need to wait for clientSecret
+  const isDevMode = !import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+  
+  if (!checkoutData || (!isDevMode && !clientSecret)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-600">Preparing checkout...</p>
+          <p className="text-gray-600">
+            {isDevMode ? "Loading checkout..." : "Preparing checkout..."}
+          </p>
         </div>
       </div>
     );
@@ -275,23 +375,30 @@ export default function Checkout() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
             >
-              <Elements 
-                stripe={stripePromise} 
-                options={{ 
-                  clientSecret,
-                  appearance: {
-                    theme: 'stripe',
-                    variables: {
-                      colorPrimary: '#f97316',
-                    }
-                  }
-                }}
-              >
-                <CheckoutForm 
+              {isDevMode ? (
+                <DevCheckoutForm 
                   checkoutData={checkoutData}
                   onPaymentSuccess={handlePaymentSuccess}
                 />
-              </Elements>
+              ) : (
+                <Elements 
+                  stripe={stripePromise} 
+                  options={{ 
+                    clientSecret,
+                    appearance: {
+                      theme: 'stripe',
+                      variables: {
+                        colorPrimary: '#f97316',
+                      }
+                    }
+                  }}
+                >
+                  <CheckoutForm 
+                    checkoutData={checkoutData}
+                    onPaymentSuccess={handlePaymentSuccess}
+                  />
+                </Elements>
+              )}
             </motion.div>
           </div>
         </div>
